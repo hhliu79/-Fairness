@@ -1,8 +1,7 @@
-
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Thu Oct  3 10:37:03 2019
+Created on Wed Oct  9 11:46:00 2019
 
 @author: huihuiliu
 """
@@ -35,7 +34,7 @@ import os
 #os.environ['CUDA_VISIBLE_DEVICES']='7'
 
 #dataset = ["adult", "compas", "german", "bank"]  
-dataset = ["adult", "compas"]  
+dataset = ["adult", "german", "compas"]  
 attribute = ["sex", "race", "age"]
 preAlgorithm = ["disparate_impact_remover", "lfr", "optim", "reweighing"] 
 inAlgorithm = ["adversarial_debiasing", "art_classifier", "prejudice_remover"]
@@ -46,18 +45,15 @@ postAlgorithm = ["calibrated_eqodds", "eqodds", "reject_option"]
 allowed_metrics = ["Statistical parity difference",
                    "Average odds difference",
                    "Equal opportunity difference"]    
-randseed = 12345679 
+randseed = 1
 cost_constraint = "weighted" # "fnr", "fpr", "weighted"
 metric_ub = 0.05
 metric_lb = -0.05
-
+       
 
 def main():
-
-    #f = open('/home/hliu79/Fairness1/result/comb_transf_test.txt', 'w')    
-    # f = open('/Users/huihuiliu/fairness Learning Project/result/comb_algorithm00.txt', 'a')        
-    #f.close()
-    for i in range(2):
+    
+    for i in range(1):
         dataset_used = dataset[i]
         for j in range(3):
             if i == 0 and j == 2:
@@ -74,8 +70,10 @@ def main():
                 arr = dataset_used + " " + "[0, 0 ,1]"
                 
             protected_attribute_used = attribute[j]
+            
+            
             for l in range(5):
-                for m in range(3):
+                for m in range(4):
                     for n in range(4):
                         dataset_orig, privileged_groups, unprivileged_groups, optim_options = LoadData(dataset_used, protected_attribute_used)                
                         algorithm_used = arr + " " + "[" + " " + str(l) + " " + str(m) + " " + str(n) + "]"
@@ -83,12 +81,13 @@ def main():
                         feature = comb_algorithm(l, m, n, dataset_orig, privileged_groups, unprivileged_groups, optim_options)
                         result = str(algorithm_used + feature)
                         print(result)
-                        with open('comb_transf_adult.txt', 'a') as f:
+                        with open('comb_transf_result.txt', 'a') as f:
                             f.write(result)
                             f.write("\n")
                             f.close()
-        
-
+    
+   
+    
 def comb_algorithm(l, m, n, dataset_original1, privileged_groups1,unprivileged_groups1, optim_options1):
     
     dataset_original2 = copy.deepcopy(dataset_original1)
