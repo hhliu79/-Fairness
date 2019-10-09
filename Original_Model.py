@@ -21,9 +21,10 @@ def train(dataset_orig_train, dataset_orig_valid, dataset_orig_test, privileged_
     scale_orig = StandardScaler()
     X_train = scale_orig.fit_transform(dataset_orig_train.features)
     y_train = dataset_orig_train.labels.ravel()
+    w_train = dataset_orig_train.instance_weights.ravel()
 
-    lmod = LogisticRegression()
-    lmod.fit(X_train, y_train)
+    lmod = LogisticRegression(solver='lbfgs', multi_class='auto')
+    lmod.fit(X_train, y_train, sample_weight = dataset_orig_train.instance_weights)
     y_train_pred = lmod.predict(X_train)
 
     # positive class index

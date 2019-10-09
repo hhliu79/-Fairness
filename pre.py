@@ -16,17 +16,25 @@ from aif360.algorithms.postprocessing.eq_odds_postprocessing import EqOddsPostpr
 from aif360.algorithms.postprocessing.reject_option_classification import RejectOptionClassification
 
 from aif360.algorithms.preprocessing.optim_preproc_helpers.opt_tools import OptTools
+import numpy as np
+
 
 def Pre(algorithm_used, dataset_orig_train, dataset_orig_valid, dataset_orig_test, privileged_groups, unprivileged_groups, optim_options):
 
     if algorithm_used == "disparate_impact_remover":
-        DIC = DisparateImpactRemover()
+        DIC = DisparateImpactRemover(repair_level=1.0)
         dataset_transf_train = DIC.fit_transform(dataset_orig_train)
         dataset_transf_valid = DIC.fit_transform(dataset_orig_valid)        
         dataset_transf_test = DIC.fit_transform(dataset_orig_test)
         
     elif algorithm_used == "lfr":
-        TR = LFR(unprivileged_groups = unprivileged_groups, privileged_groups = privileged_groups)
+        TR = LFR(unprivileged_groups = unprivileged_groups, privileged_groups = privileged_groups, k=5,
+                 Ax=0.01,
+                 Ay=1.0,
+                 Az=50.0,
+                 print_interval=250,
+                 verbose=1,
+                 seed=None)
         TR.fit(dataset_orig_train)
         dataset_transf_train = TR.transform(dataset_orig_train)        
         dataset_transf_valid = TR.transform(dataset_orig_valid)                
@@ -49,7 +57,10 @@ def Pre(algorithm_used, dataset_orig_train, dataset_orig_valid, dataset_orig_tes
         dataset_transf_valid = RW.transform(dataset_orig_valid)
         dataset_transf_test = RW.transform(dataset_orig_test)
     
-    dataset_transf = [dataset_orig_train, dataset_orig_valid, dataset_orig_test]
-    return dataset_transf
+    dataset_transf_test.labels = dataset_orig_test.labels
+    #dataset_transf_test.scores = dataset_orig_test.scores
+    
+    return dataset_transf_train, dataset_transf_valid, dataset_transf_test
 
 
+#preAlgorithm = ["disparate_impact_remover", "lft", "optim", "reweighing"] 
