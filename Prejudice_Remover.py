@@ -7,51 +7,46 @@ Created on Thu Oct  3 23:25:48 2019
 """
 
 import numpy as np
-
-# Scalers
 from sklearn.preprocessing import StandardScaler
-# Bias mitigation techniques
 from aif360.algorithms.inprocessing import PrejudiceRemover
 from aif360.metrics import ClassificationMetric
 from collections import defaultdict
-np.random.seed(1)
 import copy
 
-def prejudice_remover(dataset_orig_train, dataset_orig_valid, dataset_orig_test, privileged_groups, unprivileged_groups, sens_attr, ETA):
+def prejudice_remover(dataset_orig_train, dataset_orig_valid, dataset_orig_test, privileged_groups, unprivileged_groups, sens_attr):
+    #print(dataset_orig_train.features.shape)
+    #print(dataset_orig_train.labels.shape )
+    dataset_original_train = copy.deepcopy(dataset_orig_train)  
+    dataset_original_valid = copy.deepcopy(dataset_orig_valid)
+    dataset_original_test = copy.deepcopy(dataset_orig_test)
     
     # Learning a Prejudice Remover (PR) model on original data
-    model = PrejudiceRemover(sensitive_attr=sens_attr, eta=ETA)
+    model = PrejudiceRemover(sensitive_attr=sens_attr, eta=25.0)
     pr_orig_scaler = StandardScaler()
-    dataset_orig_train.features = pr_orig_scaler.fit_transform(dataset_orig_train.features)
-    pr_orig = model.fit(dataset_orig_train)
-    #model.fit(dataset_orig_train)
-    '''
-    valid_pre = model.predict(dataset_orig_valid)
-    test_pre = model.predict(dataset_orig_test)
-    return valid_pre, test_pre
-    '''
+    dataset_original_train.features = pr_orig_scaler.fit_transform(dataset_original_train.features)
+    dataset_original_valid.features = pr_orig_scaler.fit_transform(dataset_original_valid.features)
+    dataset_original_test.features = pr_orig_scaler.fit_transform(dataset_original_test.features)
+    pr_orig = model.fit(dataset_original_train)
     
     # validating PR model
     thresh_arr = np.linspace(0.01, 0.50, 50)
-    
-    valid_pred, valid_metrics = test(dataset_orig_valid, pr_orig, thresh_arr, privileged_groups, unprivileged_groups)
+    valid_pred, valid_metrics = test(dataset_original_valid, pr_orig, thresh_arr, privileged_groups, unprivileged_groups)
     pr_orig_best_ind = np.argmax(valid_metrics['bal_acc'])
-    val_pred, metric_val = test(dataset_orig_test, pr_orig, [thresh_arr[pr_orig_best_ind]], privileged_groups, unprivileged_groups)
-    test_pred, metric_test = test(dataset_orig_test, pr_orig, [thresh_arr[pr_orig_best_ind]], privileged_groups, unprivileged_groups)
+    
+    train_pred, metric_train = test(dataset_original_train, pr_orig, [thresh_arr[pr_orig_best_ind]], privileged_groups, unprivileged_groups)
+    val_pred, metric_val = test(dataset_original_valid, pr_orig, [thresh_arr[pr_orig_best_ind]], privileged_groups, unprivileged_groups)
+    test_pred, metric_test = test(dataset_original_test, pr_orig, [thresh_arr[pr_orig_best_ind]], privileged_groups, unprivileged_groups)
+    
+    dataset_transf_valid_pred = copy.deepcopy(dataset_orig_valid)
+    dataset_transf_valid_pred.labels = val_pred.labels
+    print(val_pred.labels.shape)
+    #dataset_transf_valid_pred.scores = val_pred.scores
+        
+    dataset_transf_test_pred = copy.deepcopy(dataset_orig_test)
+    dataset_transf_test_pred.labels = test_pred.labels
+    #dataset_transf_test_pred.scores = test_pred.scores
 
-    
-    dataset_transf_valid = copy.deepcopy(dataset_orig_valid)
-    dataset_transf_valid.labels = val_pred.labels
-    dataset_transf_valid.scores = val_pred.scores
-    
-    
-    dataset_transf_test = copy.deepcopy(dataset_orig_test)
-    dataset_transf_test.labels = test_pred.labels
-    dataset_transf_test.scores = test_pred.scores
-    
-
-    return dataset_transf_valid, dataset_transf_test
-
+    return dataset_transf_valid_pred, dataset_transf_test_pred
     #return val_pred, test_pred
     
     
@@ -82,7 +77,7 @@ def test(dataset, model, thresh_arr, privileged_groups, unprivileged_groups):
     return dataset_pred, metric_arrs  
 
     
-   
+    
     
 
 '''

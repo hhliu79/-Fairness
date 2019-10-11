@@ -19,7 +19,7 @@ from collections import defaultdict
 from collections import OrderedDict
 from art.classifiers import SklearnClassifier
 np.random.seed(1)
-
+import copy
 
 def art_classifier(dataset_orig_train, dataset_orig_valid, dataset_orig_test, privileged_groups, unprivileged_groups):    
     
@@ -74,11 +74,15 @@ def art_classifier(dataset_orig_train, dataset_orig_valid, dataset_orig_test, pr
     best_ind = np.where(ba_arr == np.max(ba_arr))[0][0]
     best_class_thresh = class_thresh_arr[best_ind]
 
+    # Metrics for the test set  
+    fav_inds = dataset_orig_valid_pred.scores > best_class_thresh
+    dataset_orig_valid_pred.labels[fav_inds] = dataset_orig_valid_pred.favorable_label
+    dataset_orig_valid_pred.labels[~fav_inds] = dataset_orig_valid_pred.unfavorable_label   
+    
     # Metrics for the test set
     fav_inds = dataset_orig_test_pred.scores > best_class_thresh
     dataset_orig_test_pred.labels[fav_inds] = dataset_orig_test_pred.favorable_label
     dataset_orig_test_pred.labels[~fav_inds] = dataset_orig_test_pred.unfavorable_label    
-
    
     return dataset_orig_valid_pred, dataset_orig_test_pred
     
