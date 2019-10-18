@@ -13,7 +13,6 @@ from aif360.algorithms.preprocessing.optim_preproc_helpers.distortion_functions\
 def LoadData(dataset_used,protected_attribute_used):
     
     if dataset_used == "adult":
-#     dataset_orig = AdultDataset()
         if protected_attribute_used == "sex":
             privileged_groups = [{'sex': 1}]
             unprivileged_groups = [{'sex': 0}]
@@ -39,7 +38,6 @@ def LoadData(dataset_used,protected_attribute_used):
         
     
     elif dataset_used == "german":
-#     dataset_orig = GermanDataset()
         if protected_attribute_used == "sex":
             privileged_groups = [{'sex': 1}]
             unprivileged_groups = [{'sex': 0}]
@@ -67,8 +65,6 @@ def LoadData(dataset_used,protected_attribute_used):
         # change from 1,2 to 1,0 
         #dataset_original.labels = dataset_original.labels - (dataset_original.labels-1.0)*2.0
         dataset_original.labels = 2 - dataset_original.labels
-        print('dataset_original.labels')
-        print(dataset_original.labels)
         dataset_original.unfavorable_label = 0.0
         
     elif dataset_used == "compas":
@@ -97,7 +93,7 @@ def LoadData(dataset_used,protected_attribute_used):
                 "dlist": [.1, 0.05, 0]
             }
         
-        
+    '''   
     elif dataset_used == "bank":
 #     dataset_orig = CompasDataset()
         if protected_attribute_used == "sex":
@@ -124,5 +120,5 @@ def LoadData(dataset_used,protected_attribute_used):
                 "dlist": [.1, 0.05, 0]
             }
         
-        
+    '''   
     return dataset_original, privileged_groups, unprivileged_groups, optim_options
