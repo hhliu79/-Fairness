@@ -1,0 +1,56 @@
+########## acc ##########
+[15:00:10] 10649x36 matrix with 383364 entries loaded from ./data/xgboost_acc.txt.train
+[15:00:10] 2663x36 matrix with 95868 entries loaded from ./data/xgboost_acc.txt.test
+Ground True:  [0.769  0.7762 0.811  0.7843 0.811 ]
+Predictions:  [0.78206223 0.7830744  0.785794   0.78206223 0.7847995 ]
+l2 loss of pred is 0.00062584346375927
+l2 loss of mean is 0.0009537981724672884
+########## AOD ##########
+[15:00:19] 10649x36 matrix with 383364 entries loaded from ./data/xgboost_AOD.txt.train
+[15:00:19] 2663x36 matrix with 95868 entries loaded from ./data/xgboost_AOD.txt.test
+Ground True:  [ 0.0866 -0.0525  0.011   0.0617 -0.0178]
+Predictions:  [ 0.02769759 -0.01776588 -0.00171173  0.03604081  0.04815939]
+l2 loss of pred is 0.001021900433755324
+l2 loss of mean is 0.0013025545807910863
+########## B_acc ##########
+[15:00:23] 10649x36 matrix with 383364 entries loaded from ./data/xgboost_B_acc.txt.train
+[15:00:23] 2663x36 matrix with 95868 entries loaded from ./data/xgboost_B_acc.txt.test
+Ground True:  [0.585  0.6241 0.6995 0.5364 0.6375]
+Predictions:  [0.5819531  0.6414946  0.64779943 0.5831566  0.6143017 ]
+l2 loss of pred is 0.0005920133176569976
+l2 loss of mean is 0.0011186319147842632
+########## DIC ##########
+[15:00:44] 10649x36 matrix with 383086 entries loaded from ./data/xgboost_DIC.txt.train
+[15:00:44] 2663x36 matrix with 95799 entries loaded from ./data/xgboost_DIC.txt.test
+Ground True:  [2.1104    0.769     0.9768    3.4383001 0.8488   ]
+Predictions:  [1.7140751 1.0388863 1.0318687 1.7356071 2.2313504]
+l2 loss of pred is 0.025147285948271078
+l2 loss of mean is 0.03342231866452448
+########## EOD ##########
+[15:01:02] 10649x36 matrix with 383364 entries loaded from ./data/xgboost_EOD.txt.train
+[15:01:02] 2663x36 matrix with 95868 entries loaded from ./data/xgboost_EOD.txt.test
+Ground True:  [ 0.1341 -0.1037  0.0237  0.0983 -0.0134]
+Predictions:  [-0.02229398 -0.01875073 -0.00309765  0.07365221  0.06337506]
+l2 loss of pred is 0.0016984251514518506
+l2 loss of mean is 0.002249987856580005
+########## SPD ##########
+[15:01:08] 10649x36 matrix with 383364 entries loaded from ./data/xgboost_SPD.txt.train
+[15:01:08] 2663x36 matrix with 95868 entries loaded from ./data/xgboost_SPD.txt.test
+Ground True:  [ 0.0627 -0.0209 -0.0004  0.038  -0.0214]
+Predictions:  [ 0.02411744 -0.00873828  0.0041793   0.02411744  0.05531073]
+l2 loss of pred is 0.0007894433531836882
+l2 loss of mean is 0.0009309876269180535
+########## TI ##########
+[15:01:11] 10649x36 matrix with 383364 entries loaded from ./data/xgboost_TI.txt.train
+[15:01:11] 2663x36 matrix with 95868 entries loaded from ./data/xgboost_TI.txt.test
+Ground True:  [0.2246 0.1915 0.1574 0.232  0.1797]
+Predictions:  [0.2133145  0.19311383 0.19330102 0.21348816 0.19561869]
+l2 loss of pred is 0.0004146197093024407
+l2 loss of mean is 0.0008589880772773877
+########## UF ##########
+[15:01:15] 10649x36 matrix with 383364 entries loaded from ./data/xgboost_UF.txt.train
+[15:01:15] 2663x36 matrix with 95868 entries loaded from ./data/xgboost_UF.txt.test
+Ground True:  [0.1417 0.1263 0.1046 0.1368 0.1121]
+Predictions:  [0.12965727 0.12848872 0.12890625 0.12965727 0.12965727]
+l2 loss of pred is 0.0002510246625276272
+l2 loss of mean is 0.0003918357606731566
