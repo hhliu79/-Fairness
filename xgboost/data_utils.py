@@ -86,10 +86,11 @@ def load_csv(fileList, params={}):
     return features[validIndex, :], labels[validIndex]
 
 
-def listDir(dirName):
+def listDir(dirName, ends = '.csv'):
     fileList = sorted(os.listdir(dirName))
-    fileList = [os.path.join(dirName, fileName) for fileName in fileList if fileName.endswith(".csv")]
+    fileList = [os.path.join(dirName, fileName) for fileName in fileList if fileName.endswith(ends)]
     return fileList
+
 
 def numpy_to_dmatrix(features, labels, params):
     """
@@ -116,12 +117,49 @@ def numpy_to_dmatrix(features, labels, params):
             for indice, value in enumerate(feature):
                 f.write(f" {indice}:{value}")
             f.write("\n")
-        
+    
+
+def load_txt_haipei(fileName):
+    keys = (["Nothing","DisparateImpactRemover","LFR","OptimPreproc","Reweighing"]
+            +["PlainModel","AdversarialDebiasing","ARTClassifier","PrejudiceRemover"]
+            +["Nothing","CalibratedEqOddsPostprocessing","EqOddsPostprocessing","RejectOptionClassification"]
+            +["dataset"]*23
+            +['TPR','TNR','FPR','FNR','Balanced_Acc','Acc',
+            "Statistical parity difference","Disparate impact","Equal opportunity difference",
+            "Average odds difference","Theil index","United Fairness"])
+    
+    records = []
+    fail_case = 0
+    with open(fileName, 'r') as f:
+        lines = f.readlines()
+        for line in lines:
+            record   = line.strip().split("\t")
+            try:
+                records.append([item for sublist in eval(record[0]) for item in sublist] + eval(record[1]))
+            except:
+                fail_case += 1
+    records = np.array(records)
+    assert records.shape[1] == len(keys)
+    
+    return records, keys
+
 
 if __name__ == '__main__':
-    dirName = './data/no_pre3/csv'
-    params = {'target':'TI'}
-    # acc,B_acc,SPD,DIC,EOD,AOD,TI,UF
-    features, labels = load_csv(listDir(dirName), params)
-    print(features.shape, labels.shape)
-    numpy_to_dmatrix(features, labels, params)
+    dirName = "/mnt/svm/code/Fairness/Haipei"
+    fileList = listDir(dirName, ends=".txt")
+    records = None
+    for fileName in fileList:
+        instance, keys= load_txt_haipei(fileName)
+        if records is None:
+            records = instance
+        else:
+            records = np.concatenate((records, instance), axis=0)
+    
+    print(records.shape)
+
+    # dirName = './data/no_pre3/csv'
+    # params = {'target':'TI'}
+    # # acc,B_acc,SPD,DIC,EOD,AOD,TI,UF
+    # features, labels = load_csv(listDir(dirName), params)
+    # print(features.shape, labels.shape)
+    # numpy_to_dmatrix(features, labels, params)
