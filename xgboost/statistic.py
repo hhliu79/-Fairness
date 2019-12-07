@@ -116,7 +116,41 @@ def compareAll(records, keys):
         ins.save(saveto)
     return
 
+def ranking(values):
+    rank = np.argsort(values)
+    return rank
+
+def aggregateRankings(ranks):
+    return 
+
+def rankingAll(records, keys):
+    ranks = []
+    saveto = f'/mnt/svm/code/Fairness/vis/ranks/ranks.pkl'
+    # 'TPR','TNR','FPR','FNR',
+    targets = ['Balanced_Acc','Acc', "Statistical parity difference","Disparate impact",
+                "Equal opportunity difference","Average odds difference","Theil index","United Fairness"]
+    bests = [1, 1, 0, 1, 0, 0, 0, 0]
+    for target, best in zip(targets, bests):
+        methodsAll = {}
+        target_index = keys.index(target)
+    
+        for record in records:
+            # for single record
+            methodsComb = str(record[:13])
+            diffFromBest = np.abs(record[target_index] - best) # smaller is better
+            methodsAll[methodsComb] = methodsAll.get(methodsComb, []) + [diffFromBest]
+        
+        combResMean = [np.mean(combRes) for index, combRes in enumerate(methodsAll.values())]
+        rank = ranking(combResMean)
+        ranks.append(rank)
+    
+    with open(saveto, 'rb') as f:
+        pickle.dump(ranks, f)
+    return ranks
+
+
 if __name__ == "__main__":
     records, keys = getData()
     # compareAllPairs(records, keys)
-    compareAll(records, keys)
+    # compareAll(records, keys)
+    rankingAll(records, keys)
