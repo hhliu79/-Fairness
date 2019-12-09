@@ -4,6 +4,7 @@ from data_utils import load_txt_haipei, listDir
 import os
 import pickle
 import tqdm
+from scipy.stats import rankdata
 
 def getData(fileName=None):
     if fileName:
@@ -149,13 +150,17 @@ def aggregateRankings(loadfrom=None):
             meanPerformance = np.mean(methodsPerTarget[method])
             methods.append(method)
             performs.append(meanPerformance)
-        ranks = ranking(performs)
+        ranks = rankdata(performs, method='min') 
+        # print(ranks)
+        # ranks = int( ranks )
+        # ranks = ranking(performs)
         allComb = methods
         for method, rank in zip(methods, ranks):
             ranksPerTarget[method] = rank
         
         ranksTargetsMethods[target] = ranksPerTarget
 
+    
     # for combIndex, comb in enumerate(sorted(allComb)):
     #     rankAllTargets = []
     #     for target in targets:
@@ -174,6 +179,7 @@ def aggregateRankings(loadfrom=None):
     #     plt.savefig(saveName)
     #     plt.close()
     
+
     # for target in targets:
     #     methodsPerTarget = []
     #     for combIndex, comb in enumerate(sorted(allComb)):
@@ -193,16 +199,23 @@ def aggregateRankings(loadfrom=None):
     #     plt.savefig(saveName)
     #     plt.close()
     
+
+    selected_targets = ['Balanced_Acc','Acc', "Theil index","United Fairness"]
+    targets_showName = ['BAcc','Acc', "SPD","DI","EOD","AOD","TI","UF"]
+    selected = 'BAcc_Acc_TI_UF_'
+    
     totalRanking = []
     for combIndex, comb in enumerate(sorted(allComb)):
         perMethod = 0
         for target in targets:
+            if target not in selected_targets:
+                continue
             perMethod += ranksTargetsMethods[target][comb]
         totalRanking.append(perMethod)
     
     plt.bar(list(range(80)), np.array(totalRanking))
-    title = 'dataset: ' + os.path.basename(loadfrom)
-    saveName = 'dataset:' + os.path.basename(loadfrom)
+    title = selected+'dataset: ' + os.path.basename(loadfrom)
+    saveName = selected+'dataset:' + os.path.basename(loadfrom)
     saveName = "/mnt/svm/code/Fairness/vis/ranks/totalRankingPerDataset/"+saveName+'.png'
     
     plt.title(title)
@@ -214,8 +227,7 @@ def aggregateRankings(loadfrom=None):
     plt.close()
 
 
-def rankingAll(records, keys, fileName=None):
-    methodsAllTarget = {}
+def methodsAllTargets(records, keys, fileName=None):
     if fileName:
         saveto = fileName.replace('.pkl', '_ranks.pkl')
         assert saveto != fileName
@@ -225,6 +237,8 @@ def rankingAll(records, keys, fileName=None):
     targets = ['Balanced_Acc','Acc', "Statistical parity difference","Disparate impact",
                 "Equal opportunity difference","Average odds difference","Theil index","United Fairness"]
     bests = [1, 1, 0, 1, 0, 0, 0, 0]
+    
+    methodsAllTarget = {}
     for target, best in tqdm.tqdm(zip(targets, bests)):
         methodsPerTarget = {}
         target_index = keys.index(target)
@@ -250,7 +264,7 @@ if __name__ == "__main__":
         if '_ranks.pkl' in fileName:
             continue
         # records, keys = getData(fileName)
-        # rankingAll(records, keys, fileName=fileName)
+        # methodsAllTargets(records, keys, fileName=fileName)
         
         loadfrom = fileName.replace('.pkl', '_ranks.pkl')
         aggregateRankings(loadfrom)
