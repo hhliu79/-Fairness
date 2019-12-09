@@ -257,10 +257,24 @@ def methodsAllTargets(records, keys, fileName=None):
     return methodsAllTarget
 
 
+def abnormal(records, keys):
+    print(keys)
+    index = keys.index('Acc')
+    abnormRecs = []
+    for record in records:
+        if record[index]<0.5 or record[index]>1.0:
+            abnormRecs.append(record[index])
+        assert record[index]<=1.0
+    # print(abnormRecs)
+    print('#abnorm/#total', len(abnormRecs), '/', len(records))
+
 if __name__ == "__main__":
     dirName = '/mnt/svm/code/Fairness/Haipei'
     fileList = listDir(dirName, ends=".pkl")
     for fileName in fileList:
+        if 'alldatasets.pkl' in fileName:
+            records, keys = getData(fileName)
+            abnormal(records, keys)
         if '_ranks.pkl' in fileName:
             continue
         # records, keys = getData(fileName)
