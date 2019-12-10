@@ -5,6 +5,8 @@ import os
 import pickle
 import tqdm
 from scipy.stats import rankdata
+import xlwt 
+from xlwt import Workbook 
 
 def getData(fileName=None):
     if fileName:
@@ -123,11 +125,16 @@ def compareAll(records, keys):
         ins.save(saveto)
     return
 
-def ranking(values):
-    rank = np.argsort(values)
-    return rank
+def combToNumbers(comb):
+    methods = [0,0,0]
+    comb = comb.replace('.', ',')
+    comb = eval(comb)
+    methods[0] = comb[0:5].index(1)
+    methods[1] = comb[5:5+4].index(1)
+    methods[2] = comb[9:9+4].index(1)
+    return tuple(methods)
 
-def aggregateRankings(loadfrom=None):
+def aggregateRankings(wb, loadfrom=None):
     targets = ['Balanced_Acc','Acc', "Statistical parity difference","Disparate impact",
                 "Equal opportunity difference","Average odds difference","Theil index","United Fairness"]
     targets_showName = ['BAcc','Acc', "SPD","DI",
@@ -180,51 +187,53 @@ def aggregateRankings(loadfrom=None):
     #     plt.close()
     
 
-    # for target in targets:
-    #     methodsPerTarget = []
-    #     for combIndex, comb in enumerate(sorted(allComb)):
-    #         methodsPerTarget.append(ranksTargetsMethods[target][comb])
-        
-    #     plt.bar(list(range(80)), np.array(methodsPerTarget))
-    #     # plt.xticks(list(range(80)), list(range(80)))
-    #     title = 'dataset: ' + os.path.basename(loadfrom) + '\n' + 'target: ' + target
-    #     saveName = 'dataset:' + os.path.basename(loadfrom) + 'target:' + target
-    #     saveName = "/mnt/svm/code/Fairness/vis/ranks/methodsPerTarget/"+saveName+'.png'
-        
-    #     plt.title(title)
-    #     plt.ylabel('ranking')
-    #     plt.xlabel('comb method index')
-    #     plt.subplots_adjust(top=0.83)
-    #     # plt.show()
-    #     plt.savefig(saveName)
-    #     plt.close()
+    ## method per target
+    targetsMethods = {}
+    for target in targets:
+        methodsPerTarget = {}
+        for combIndex, comb in enumerate(sorted(allComb)):
+            # methodsPerTarget.append(ranksTargetsMethods[target][comb])
+            methodsPerTarget[comb] = ranksTargetsMethods[target][comb]
+        targetsMethods[target] = methodsPerTarget
+    sheetName = os.path.basename(loadfrom).split('.')[0]
+    saveName = '/mnt/svm/code/Fairness/vis/ranksTxt/methodsPerTarget/ranking.xls'
     
+    sheet = wb.add_sheet(sheetName) 
+    
+    for col, target in enumerate(targets):
+        sheet.write(0, int(col), targets_showName[col])   # row, col
+        for comb in sorted(allComb):
+            row = targetsMethods[target][comb]
+            print(col, row, combToNumbers(comb))
+            sheet.write(int(row), int(col), str(combToNumbers(comb)))   # row, col
+    wb.save(saveName) 
 
-    selected_targets = ['Balanced_Acc','Acc', "Theil index","United Fairness"]
-    targets_showName = ['BAcc','Acc', "SPD","DI","EOD","AOD","TI","UF"]
-    selected = 'BAcc_Acc_TI_UF_'
+
+    ## plttotal ranking
+    # selected_targets = ['Balanced_Acc','Acc', "Theil index","United Fairness"]
+    # targets_showName = ['BAcc','Acc', "SPD","DI","EOD","AOD","TI","UF"]
+    # selected = 'BAcc_Acc_TI_UF_'
+    # totalRanking = []
+    # for combIndex, comb in enumerate(sorted(allComb)):
+    #     perMethod = 0
+    #     for target in targets:
+    #         if target not in selected_targets:
+    #             continue
+    #         perMethod += ranksTargetsMethods[target][comb]
+    #     totalRanking.append(perMethod)
     
-    totalRanking = []
-    for combIndex, comb in enumerate(sorted(allComb)):
-        perMethod = 0
-        for target in targets:
-            if target not in selected_targets:
-                continue
-            perMethod += ranksTargetsMethods[target][comb]
-        totalRanking.append(perMethod)
+    # plt.bar(list(range(80)), np.array(totalRanking))
+    # title = selected+'dataset: ' + os.path.basename(loadfrom)
+    # saveName = selected+'dataset:' + os.path.basename(loadfrom)
+    # saveName = "/mnt/svm/code/Fairness/vis/ranks/totalRankingPerDataset/"+saveName+'.png'
     
-    plt.bar(list(range(80)), np.array(totalRanking))
-    title = selected+'dataset: ' + os.path.basename(loadfrom)
-    saveName = selected+'dataset:' + os.path.basename(loadfrom)
-    saveName = "/mnt/svm/code/Fairness/vis/ranks/totalRankingPerDataset/"+saveName+'.png'
-    
-    plt.title(title)
-    plt.ylabel('ranking')
-    plt.xlabel('comb method index')
-    plt.subplots_adjust(top=0.83)
-    # plt.show()
-    plt.savefig(saveName)
-    plt.close()
+    # plt.title(title)
+    # plt.ylabel('ranking')
+    # plt.xlabel('comb method index')
+    # plt.subplots_adjust(top=0.83)
+    # # plt.show()
+    # plt.savefig(saveName)
+    # plt.close()
 
 
 def methodsAllTargets(records, keys, fileName=None):
@@ -271,6 +280,7 @@ def abnormal(records, keys):
 if __name__ == "__main__":
     dirName = '/mnt/svm/code/Fairness/Haipei'
     fileList = listDir(dirName, ends=".pkl")
+    wb = Workbook() 
     for fileName in fileList:
         if 'alldatasets.pkl' in fileName:
             records, keys = getData(fileName)
@@ -281,7 +291,7 @@ if __name__ == "__main__":
         # methodsAllTargets(records, keys, fileName=fileName)
         
         loadfrom = fileName.replace('.pkl', '_ranks.pkl')
-        aggregateRankings(loadfrom)
+        aggregateRankings(wb, loadfrom)
     
     # compareAllPairs(records, keys)
     # compareAll(records, keys)
