@@ -7,6 +7,7 @@ import tqdm
 from scipy.stats import rankdata
 import xlwt 
 from xlwt import Workbook 
+import collections
 
 def getData(fileName=None):
     if fileName:
@@ -166,27 +167,7 @@ def aggregateRankings(wb, loadfrom=None):
             ranksPerTarget[method] = rank
         
         ranksTargetsMethods[target] = ranksPerTarget
-
     
-    # for combIndex, comb in enumerate(sorted(allComb)):
-    #     rankAllTargets = []
-    #     for target in targets:
-    #         rankAllTargets.append(ranksTargetsMethods[target][comb])
-        
-    #     plt.plot(np.array(rankAllTargets))
-    #     plt.xticks(list(range(8)), targets_showName)
-    #     title = 'dataset: ' + os.path.basename(loadfrom) + '\n' + 'methods: ' + comb + '\n' + f'methodsIndex: {combIndex}'
-    #     saveName = 'dataset:' + os.path.basename(loadfrom) + 'methods:' + comb + f'methodsIndex:{combIndex}'
-    #     saveName = "/mnt/svm/code/Fairness/vis/ranks/perMethodperDataset/"+saveName+'.png'
-        
-    #     plt.title(title)
-    #     plt.ylabel('ranking')
-    #     plt.xlabel('criteria')
-    #     plt.subplots_adjust(top=0.83)
-    #     plt.savefig(saveName)
-    #     plt.close()
-    
-
     ## method per target
     targetsMethods = {}
     for target in targets:
@@ -200,41 +181,28 @@ def aggregateRankings(wb, loadfrom=None):
     
     sheet = wb.add_sheet(sheetName) 
     
-    for col, target in enumerate(targets):
-        sheet.write(0, int(col), targets_showName[col])   # row, col
+    comb_rank = collections.defaultdict(list)
+    for col, target in enumerate(targets):                  # col is the target index
+        sheet.write(0, int(col), targets_showName[col])     # row, col
         for comb in sorted(allComb):
-            row = targetsMethods[target][comb]
-            print(col, row, combToNumbers(comb))
+            row = targetsMethods[target][comb]              # row is the ranking w.r.t comb and target
+            # print(col, row, combToNumbers(comb))
             sheet.write(int(row), int(col), str(combToNumbers(comb)))   # row, col
-    wb.save(saveName) 
-
-
-    ## plttotal ranking
-    # selected_targets = ['Balanced_Acc','Acc', "Theil index","United Fairness"]
-    # targets_showName = ['BAcc','Acc', "SPD","DI","EOD","AOD","TI","UF"]
-    # selected = 'BAcc_Acc_TI_UF_'
-    # totalRanking = []
-    # for combIndex, comb in enumerate(sorted(allComb)):
-    #     perMethod = 0
-    #     for target in targets:
-    #         if target not in selected_targets:
-    #             continue
-    #         perMethod += ranksTargetsMethods[target][comb]
-    #     totalRanking.append(perMethod)
+            comb_rank[combToNumbers(comb)].append(row)
     
-    # plt.bar(list(range(80)), np.array(totalRanking))
-    # title = selected+'dataset: ' + os.path.basename(loadfrom)
-    # saveName = selected+'dataset:' + os.path.basename(loadfrom)
-    # saveName = "/mnt/svm/code/Fairness/vis/ranks/totalRankingPerDataset/"+saveName+'.png'
+    for key in comb_rank:
+        assert len(comb_rank[key]) == 8
+        comb_rank[key] = np.mean(comb_rank[key])
+    comb_score_pair = [(comb, score) for comb, score in comb_rank.items()]
+    comb_score_pair = sorted(comb_score_pair, key=lambda a: a[1])
+    baseName = "/mnt/svm/code/Fairness/vis/ranksTxt/methodsPerTarget/"
     
-    # plt.title(title)
-    # plt.ylabel('ranking')
-    # plt.xlabel('comb method index')
-    # plt.subplots_adjust(top=0.83)
-    # # plt.show()
-    # plt.savefig(saveName)
-    # plt.close()
+    with open(baseName+sheetName+".txt", 'w') as f:
+        for comb, score in comb_score_pair:
+            f.write(str(comb)+'\n')
 
+    ## save as xls
+    # wb.save(saveName) 
 
 def methodsAllTargets(records, keys, fileName=None):
     if fileName:
