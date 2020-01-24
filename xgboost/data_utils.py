@@ -130,15 +130,24 @@ def load_txt_haipei(fileName):
     
     records = []
     fail_case = 0
+    acc_fail = 0
     with open(fileName, 'r') as f:
         lines = f.readlines()
         for line in lines:
-            record   = line.strip().split("\t")
+            record = line.strip().split("\t")
             try:
-                records.append([item for sublist in eval(record[0]) for item in sublist] + eval(record[1]))
+                newRec = [item for sublist in eval(record[0]) for item in sublist] + eval(record[1])
+                index = keys.index('Acc')
+                if 0.0 <= newRec[index] <= 1.0:
+                    records.append(newRec)
+                else:
+                    acc_fail += 1
             except:
                 fail_case += 1
     records = np.array(records)
+    print("process: ", fileName)
+    print("fail case number: ", fail_case, " | acc fail number: ", acc_fail, ' | normal number: ', records.shape[0])
+    print('-----------------------')
     assert records.shape[1] == len(keys)
     
     return records, keys

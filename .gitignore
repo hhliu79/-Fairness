@@ -1,2 +1,4 @@
 xgboost/data/
 __pycache__/
+xgboost/models/
+xgboost/figs/

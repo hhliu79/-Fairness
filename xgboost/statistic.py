@@ -192,7 +192,7 @@ def aggregateRankings(wb, loadfrom=None):
     
     for key in comb_rank:
         assert len(comb_rank[key]) == 8
-        comb_rank[key] = np.mean(comb_rank[key])
+        comb_rank[key] = np.mean(comb_rank[key][0:2]) + np.mean(comb_rank[key][2:])
     comb_score_pair = [(comb, score) for comb, score in comb_rank.items()]
     comb_score_pair = sorted(comb_score_pair, key=lambda a: a[1])
     baseName = "/mnt/svm/code/Fairness/vis/ranksTxt/methodsPerTarget/"
