@@ -223,16 +223,22 @@ def prepareTxt(dictData, params):
     mode = params['mode']
     saveto = params['saveto']
     trainRatio = params['trainRatio']
+    featSelect = params['featSelect'] if 'featSelect' in params else None
+    
     trainFile = os.path.join(saveto, 'xgboostTrain.txt')
     testFile = os.path.join(saveto, 'xgboostTest.txt')
     if mode in files:
         allfeatures, alllabels = dictData[mode]
-
+        if featSelect is not None:
+            allfeatures = allfeatures[:, featSelect] 
+            
     if mode == 'mixup':
         allfeatures = []
         alllabels = []
         for fileName in dictData:
-            features, labels = dictData[fileName]   
+            features, labels = dictData[fileName]
+            if featSelect is not None:
+                features = features[:, featSelect] 
             allfeatures.append(features)
             alllabels.append(labels)
         allfeatures = np.concatenate(tuple(allfeatures), axis=0)

@@ -46,6 +46,7 @@ def classifier(params, paramsTree):
     
     print("test acc :", float(sum(gt == pred)) / len(pred) )
 
+"""
 def classifierTrees(params):
     targetName = params['target']
     trainattr = params['trainattr']
@@ -60,6 +61,7 @@ def classifierTrees(params):
     pred = pred > 0.5
     
     print("test acc :", float(sum(gt == pred)) / len(pred) )
+"""
 
 def constructTrainFile(fileBase, start, end):
     fileName = f"/mnt/svm/code/Fairness/Haipei_80/xgboostFormat/{fileBase}.txt"
@@ -78,17 +80,19 @@ if __name__ == "__main__":
     # files : ['vectors_adult_race_.txt', 'vectors_adult_sex_.txt', 'vectors_compas_race_.txt', 'vectors_compas_sex_.txt']
     labels = ["B_acc", "acc", "SPD", "DIC", "EOD", "AOD", "TI", "UF"]
     for target in labels:
+        # prepare data for xgboost model
         print("target", target)
         params = {'saveto': "/mnt/svm/code/Fairness/Haipei_80", 'sampleN': 100000}
         dictData = loadParial(params)
         params = {  'target':target, 
-                    'mode': 'vectors_compas_race_.txt', 
+                    'mode': "mixup", 
                     'saveto': "/mnt/svm/code/Fairness/Haipei_80/xgboostFormat",
-                    'trainRatio': 0.7
+                    'trainRatio': 0.7,
+                    'featSelect': list(range(37)) + list(range(47,49))
                 }
         prepareTxt(dictData, params)
         
-        
+        # xgboost model params
         paramsTree = {
             'colsample_bynode': 0.8,
             'learning_rate': 0.3,
@@ -102,37 +106,5 @@ if __name__ == "__main__":
         print('xgb params:')
         print(paramsTree)
         params = {'saveto': "/mnt/svm/code/Fairness/Haipei_80/xgboostFormat",
-                    'modelName': f"compas_race_{target}"}
+                    'modelName': f"mixup_{target}"}
         classifier(params, paramsTree)
-
-
-    # files : ['vectors_adult_race_.txt', 'vectors_adult_sex_.txt', 'vectors_compas_race_.txt', 'vectors_compas_sex_.txt']
-    labels = ["B_acc", "acc", "SPD", "DIC", "EOD", "AOD", "TI", "UF"]
-    for target in labels:
-        print("target", target)
-        params = {'saveto': "/mnt/svm/code/Fairness/Haipei_80", 'sampleN': 100000}
-        dictData = loadParial(params)
-        params = {  'target':target, 
-                    'mode': 'vectors_compas_sex_.txt', 
-                    'saveto': "/mnt/svm/code/Fairness/Haipei_80/xgboostFormat",
-                    'trainRatio': 0.7
-                }
-        prepareTxt(dictData, params)
-        
-        
-        paramsTree = {
-            'colsample_bynode': 0.8,
-            'learning_rate': 0.3,
-            'max_depth': 10,
-            'num_parallel_tree': 3000,
-            'objective': 'binary:logistic',
-            'subsample': 0.7,
-            'tree_method': 'gpu_hist',
-            'verbosity': 0
-        }
-        print('xgb params:')
-        print(paramsTree)
-        params = {'saveto': "/mnt/svm/code/Fairness/Haipei_80/xgboostFormat",
-                    'modelName': f"compas_sex_{target}"}
-        classifier(params, paramsTree)
-        
