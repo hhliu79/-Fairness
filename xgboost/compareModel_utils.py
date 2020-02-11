@@ -28,7 +28,7 @@ def write2file(f, records, keys, target):
                 "TI": "Theil index",
                 "UF": "United Fairness"}
 
-    perms = itertools.permutations(range(records.shape[0]), 2)
+    perms = itertools.combinations(range(records.shape[0]), 2)
     targetIndex = keys.index(targetMap[target])
     for perm in perms:
         perm = np.array(perm)
@@ -45,7 +45,7 @@ def write2file(f, records, keys, target):
     return None
 
 def getCombPairs(records, keys):
-    perms = itertools.permutations(range(records.shape[0]), 2)
+    perms = itertools.combinations(range(records.shape[0]), 2)
     features = []
     labels = []
     for perm in perms:
@@ -147,7 +147,6 @@ def dict2pairs(records_seperate, params):
     savetoFile = os.path.join(saveto, 'pairwisedata.pkl')
     with open(savetoFile, 'wb') as f:
         pickle.dump(pairs, f)
-
 
 def dict2dmatrix(records_seperate, params):
     """
@@ -271,8 +270,41 @@ def prepareTxt(dictData, params):
         f.write("\n")
     f.close()
 
+from data_utils import class_to_onehot
+def dataFeat2CombMatrix(dataFeats, params, methods=[5, 4, 4]):
+    """
+    args:
+        dataFeats: numpy array of datsFeats, each row is a record
+        methods: the numbers of each methods (pre, in, post)
+        params: saveto
+    return:
+        all permutation of method and their features
+    """
+    label = 1.0
+    f = params['saveto']
+    
+    with open(f, 'w') as f:    
+        for feature in dataFeats:
+            for (preMethod, inMethod, postMethod) in itertools.product(range(5), range(4), range(4)):
+                method1Feat = class_to_onehot([preMethod, inMethod, postMethod], {'methods':[5,4,4]})
+                for (preMethod, inMethod, postMethod) in itertools.product(range(5), range(4), range(4)):
+                    method2Feat = class_to_onehot([preMethod, inMethod, postMethod], {'methods':[5,4,4]})
+                    f.write(f"{label}")
+                    methodDataFeature = np.concatenate((method1Feat, method2Feat, feature), axis=0)
+                    for indice, value in enumerate(methodDataFeature):
+                        f.write(f" {indice}:{value}")
+                    f.write("\n")
 
 if __name__ == "__main__":
+    """
+    # test dataFeat2CombMatrix 
+    dataFeats = np.zeros((2,23))
+    params = {}
+    params['saveto'] = './combination.txt'
+    dataFeat2CombMatrix(dataFeats, params)
+    """
+
+    """
     records_seperate = txt2dict()
     print(records_seperate.keys())
     params = {'saveto': "/mnt/svm/code/Fairness/Haipei_80", 'sampleN': 100000}
@@ -284,6 +316,7 @@ if __name__ == "__main__":
                 'trainRatio': 0.7
             }
     prepareTxt(dictData, params)
+    """
     """
     for target in ["B_acc", "acc", "SPD", "DIC", "EOD", "AOD", "TI", "UF"]:
         params = {'saveto': "/mnt/svm/code/Fairness/Haipei_80/xgboostFormat",

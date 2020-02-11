@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import tqdm
 import os
-from compareModel_utils import loadParial, prepareTxt
+from compareModel_utils import loadParial, prepareTxt, txt2dict, dict2pairs
 import matplotlib.pyplot as plt
 import pickle
 
@@ -79,6 +79,9 @@ def constructTrainFile(fileBase, start, end):
 if __name__ == "__main__":
     # files : ['vectors_adult_race_.txt', 'vectors_adult_sex_.txt', 'vectors_compas_race_.txt', 'vectors_compas_sex_.txt']
     labels = ["B_acc", "acc", "SPD", "DIC", "EOD", "AOD", "TI", "UF"]
+    params = {'saveto': "/mnt/svm/code/Fairness/Haipei_80", 'sampleN': 100000}
+    #records_seperate = txt2dict()
+    #dict2pairs(records_seperate, params)
     for target in labels:
         # prepare data for xgboost model
         print("target", target)
@@ -95,11 +98,11 @@ if __name__ == "__main__":
         # xgboost model params
         paramsTree = {
             'colsample_bynode': 0.8,
-            'learning_rate': 0.3,
+            'learning_rate': 0.1,
             'max_depth': 10,
-            'num_parallel_tree': 3000,
+            'num_parallel_tree': 2000,
             'objective': 'binary:logistic',
-            'subsample': 0.7,
+            'subsample': 0.75,
             'tree_method': 'gpu_hist',
             'verbosity': 0
         }
