@@ -4,6 +4,20 @@ import re
 import os
 
 
+def onehot_to_class(onehotList, params={"methods":[5,4,4]}):
+    """
+    [0,1,0, 1,0,0, 0,0,1 ] -> [1,0,2]
+    """
+    onehotList = list(onehotList)
+    classList = []
+    startIndex = 0
+    for NumMethod in params['methods']:
+        method = onehotList[startIndex:startIndex + NumMethod]
+        classId = method.index(1)
+        classList.append(classId)
+        startIndex += NumMethod
+    return classList
+
 def class_to_onehot(classList, params):
     """
     [1,0,2] -> [0,1,0, 1,0,0, 0,0,1 ]

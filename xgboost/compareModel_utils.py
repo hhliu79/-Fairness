@@ -9,6 +9,15 @@ import pickle
 import itertools
 import tqdm
 
+targetMap = {"B_acc": "Balanced_Acc",
+                "acc": "Acc",
+                "SPD": "Statistical parity difference",
+                "DIC": "Disparate impact",
+                "EOD": "Equal opportunity difference",
+                "AOD": "Average odds difference",
+                "TI": "Theil index",
+                "UF": "United Fairness"}
+
 def write2file(f, records, keys, target):
     """
     args:
@@ -19,15 +28,6 @@ def write2file(f, records, keys, target):
         - records: batch records with same dataset attribute
         - f: file to write records
     """
-    targetMap = {"B_acc": "Balanced_Acc",
-                "acc": "Acc",
-                "SPD": "Statistical parity difference",
-                "DIC": "Disparate impact",
-                "EOD": "Equal opportunity difference",
-                "AOD": "Average odds difference",
-                "TI": "Theil index",
-                "UF": "United Fairness"}
-
     perms = itertools.combinations(range(records.shape[0]), 2)
     targetIndex = keys.index(targetMap[target])
     for perm in perms:
